@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Turbulenss</title>
+
+  <style>
+    /* ---------- Global ---------- */
+    html {
+      font-size: 150%;
+      image-rendering: pixelated;
+    }
+
+    /* ---------- Base ---------- */
+    body {
+      margin: 64px auto;
+      max-width: 720px;
+      padding: 0 16px 140px;
+
+      /* boring, standard fonts */
+      font-family: system-ui, monospace;
+      line-height: 1.6;
+
+      background: #fefae0;
+      color: #111;
+    }
+
+    /* ---------- Headings ---------- */
+    h1 {
+      margin-bottom: 32px;
+      font-family: system-ui, monospace;
+      font-size: 1.4em;
+      letter-spacing: 0.02em;
+    }
+
+    h2 {
+      margin-top: 56px;
+      margin-bottom: 16px;
+      font-family: system-ui, monospace;
+      font-size: 0.9em;
+      letter-spacing: 0.02em;
+    }
+
+    /* ---------- Text ---------- */
+    p {
+      margin: 0 0 20px 0;
+    }
+
+    /* ---------- Highlight ---------- */
+    .highlight {
+      color: #9c7c00;
+      text-decoration: underline;
+      text-decoration-style: dotted;
+    }
+
+    /* ---------- About ---------- */
+    .about-kv {
+      padding-left: 20px;
+      font-size: 0.95em;
+      line-height: 1.7;
+    }
+
+    .key {
+      color: #9c7c00;
+    }
+
+    /* ---------- Projects ---------- */
+    #projects {
+      margin-top: 16px;
+      padding-left: 20px;
+    }
+
+    .project {
+      padding: 20px 0;
+      border-bottom: 2px dashed rgba(0, 0, 0, 0.15);
+    }
+
+    .project-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 16px;
+      padding-right: 12px;
+    }
+
+    .project strong {
+      font-size: 1.05em;
+      font-weight: normal;
+    }
+
+    .project-langs {
+      font-size: 0.85em;
+      color: #666;
+      white-space: nowrap;
+    }
+
+    .project .meta {
+      margin-top: 8px;
+      max-width: 520px;
+      line-height: 1.5;
+      color: #555;
+    }
+
+    /* ---------- Links ---------- */
+    a {
+      color: #111;
+      text-decoration: none;
+      border-bottom: 1px dotted #111;
+    }
+
+    a:hover {
+      background: #111;
+      color: #fefae0;
+    }
+
+    /* ---------- Footer ---------- */
+    footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+
+      padding: 16px 0;
+      text-align: center;
+
+      background: #fefae0;
+      border-top: 2px solid #111;
+      font-size: 0.9em;
+    }
+
+    /* ---------- Scrollbar ---------- */
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: #111 #fefae0;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fefae0;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #111;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #333;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>@TURBULENSS</h1>
+
+  <p>
+    If you need <span class="highlight">pretty</span> stuff, leave.<br />
+    It looks boring because it’s <span class="highlight">stable</span>,
+    and <span class="highlight">predictable</span>.
+  </p>
+
+  <h2># ABOUT</h2>
+  <div class="about-kv">
+    <div><span class="key">focus</span>: systems, cryptography, low-level</div>
+    <div><span class="key">languages</span>: rust, python, javascript, bash</div>
+  </div>
+
+  <h2># PROJECTS</h2>
+  <div id="projects">
+    <p>
+      Loading… if this fails,
+      <span class="highlight">that’s not my problem</span>.
+    </p>
+  </div>
+
+  <footer>
+    <a href="https://github.com/turbulenss" target="_blank" rel="noopener">GitHub</a>
+    ·
+    <a href="mailto:nishitjeph0@protonmail.com">Email</a>
+    .
+    <a href=""
+  </footer>
+
+  <script>
+    const USERNAME = "turbulenss";
+    const container = document.getElementById("projects");
+
+    fetch(`https://api.github.com/users/${USERNAME}/repos`)
+      .then(res => res.json())
+      .then(async repos => {
+        container.innerHTML = "";
+
+        const filtered = repos
+          .filter(r => !r.fork)
+          .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))
+          .slice(0, 6);
+
+        for (const repo of filtered) {
+          const div = document.createElement("div");
+          div.className = "project";
+
+          let languages = "";
+          try {
+            const langRes = await fetch(repo.languages_url);
+            const langData = await langRes.json();
+            languages = Object.keys(langData).slice(0, 3).join(" · ");
+          } catch {
+            languages = "";
+          }
+
+          div.innerHTML = `
+            <div class="project-row">
+              <strong>
+                <a href="${repo.html_url}" target="_blank" rel="noopener">
+                  ${repo.name}
+                </a>
+              </strong>
+              <span class="project-langs">${languages}</span>
+            </div>
+            <div class="meta">
+              ${repo.description || "No description provided."}
+            </div>
+          `;
+
+          container.appendChild(div);
+        }
+      })
+      .catch(() => {
+        container.innerHTML = "<p>Failed to load projects.</p>";
+      });
+  </script>
+</body>
+</html>
